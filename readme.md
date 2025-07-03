@@ -2,7 +2,7 @@
 
 This project is a simple node project for automating batch exports from Google Lighthouse.
 
-`https://yoursite.com/page` ➡ `lh-1-yoursite.com-lg-2025-07-03-12531143.html`
+`https://yoursite.com/page` ➡ `lh-1-yoursite.com-page-lg-2025-07-03-13283137.html`
 
 ## Getting Started
 
