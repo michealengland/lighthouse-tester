@@ -64,18 +64,28 @@ const runLighthouse = async (url, index) => {
     .slice(0, 19);           // remove milliseconds and Z
 
   for (const run of runs) {
-    const result = await lighthouse(url, { port,
+    const result = await lighthouse(url, {
+      port,
       output: 'html',
       logLevel: 'info',
     }, run.config);
 
     const reportHtml = result.report;
-    const hostname = new URL(url).hostname.replace('www.', '');
-    const filename = `lh-${index + 1}-${hostname}-${run.label}-${timestamp}.html`;
+
+    // Extract hostname and pathname, sanitized for file names
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname.replace('www.', '');
+    const pathname = parsedUrl.pathname
+      .replace(/^\/|\/$/g, '')      // remove leading/trailing slashes
+      .replace(/[^a-z0-9]/gi, '-')  // replace unsafe filename characters
+      .toLowerCase() || 'home';     // fallback for root path
+
+    const filename = `lh-${index + 1}-${hostname}-${pathname}-${run.label}-${timestamp}.html`;
     const reportPath = path.join(outputDir, filename);
     fs.writeFileSync(reportPath, reportHtml);
     console.log(`✅ ${run.label} report saved for ${url}: ${reportPath}`);
   }
+
 
   await ChromeLauncher.killAll();
 };
