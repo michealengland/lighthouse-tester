@@ -17,15 +17,47 @@ if (!fs.existsSync(outputDir)) {
 
 const runLighthouse = async (url, index) => {
   const chrome = await ChromeLauncher.launch({ chromeFlags: ['--headless'] });
-  const options = { port: chrome.port, output: 'html', logLevel: 'info' };
-  const runnerResult = await lighthouse(url, options);
+  const port = chrome.port;
 
-  const reportHtml = runnerResult.report;
-  const filename = `report-${index + 1}-${new URL(url).hostname}.html`;
-  const reportPath = path.join(outputDir, filename);
-  fs.writeFileSync(reportPath, reportHtml);
+  const runs = [
+    {
+      label: 'mobile',
+      config: {
+        extends: 'lighthouse:default',
+        settings: {
+          emulatedFormFactor: 'mobile',
+          formFactor: 'mobile',
+          screenEmulation: { mobile: true, width: 375, height: 667, deviceScaleFactor: 2, disabled: false },
+        },
+      },
+    },
+    {
+      label: 'desktop',
+      config: {
+        extends: 'lighthouse:default',
+        settings: {
+          emulatedFormFactor: 'desktop',
+          formFactor: 'desktop',
+          screenEmulation: { mobile: false, width: 1350, height: 940, deviceScaleFactor: 1, disabled: false },
+        },
+      },
+    },
+  ];
 
-  console.log(`✅ Report saved for ${url}: ${reportPath}`);
+  for (const run of runs) {
+    const result = await lighthouse(url, {
+      port,
+      output: 'html',
+      logLevel: 'info',
+    }, run.config);
+
+    const reportHtml = result.report;
+    const label = run.label;
+    const filename = `report-${index + 1}-${label}-${new URL(url).hostname}.html`;
+    const reportPath = path.join(outputDir, filename);
+    fs.writeFileSync(reportPath, reportHtml);
+    console.log(`✅ ${label} report saved for ${url}: ${reportPath}`);
+  }
 
   await ChromeLauncher.killAll();
 };
