@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const urlsFile = path.join(__dirname, 'urls.txt');
-const outputDir = path.join(__dirname, 'report-output');
+const outputDir = path.join(__dirname, 'results');
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir);
